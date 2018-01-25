@@ -1,6 +1,3 @@
-DROP TABLE plays;
-DROP TABLE playwrights;
-
 
 CREATE TABLE plays (
   id INTEGER PRIMARY KEY,

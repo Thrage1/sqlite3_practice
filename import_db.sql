@@ -22,5 +22,5 @@ VALUES
 INSERT INTO
   plays(title, year, playwright_id)
 VALUES
-  ('Wizard''s First Rule', 1999, (select id from playwrights where name = 'Terry Goodkind')),
-  ('The Cockaroach', 1966, (select id from playwrights where name = 'Franz Kafka'));
+  ('Wizard''s First Rule', 1999, (SELECT id FROM playwrights WHERE name = 'Terry Goodkind')),
+  ('The Cockaroach', 1966, (SELECT id FROM playwrights WHERE name = 'Franz Kafka'));

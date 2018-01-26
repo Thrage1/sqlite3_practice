@@ -28,11 +28,11 @@ class Play
 
   def create
     raise "#{self} already exists in the database" if @id
-    PlayDBConnection.instance.execute(<<-SQL, @title, @year, @playwright_id)
+    PlayDBConnection.instance.execute(<<-SQL, title: title, year: year, playwright_id: playwright_id)
     INSERT INTO
       plays(title, year, playwright_id)
     VALUES
-      (?, ?, ?)
+      (:title, :year, :playwright_id)
     SQL
     @id = PlayDBConnection.instance.last_insert_row_id
   end

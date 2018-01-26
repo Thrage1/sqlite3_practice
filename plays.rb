@@ -1,5 +1,6 @@
-require 'singleton'
+
 require 'sqlite3'
+require 'singleton'
 
 class PlayDBConnection < SQLite3::Database
   include Singleton
@@ -8,14 +9,14 @@ class PlayDBConnection < SQLite3::Database
     self.type_translation = true
     self.results_as_hash = true
   end
-
 end
 
 class Play
-    attr_accessor :title, :year, :playwright_id
+  attr_accessor :title, :year, :playwright_id
+
   def self.all
     data = PlayDBConnection.instance.execute("SELECT * FROM plays")
-    data.map { |datum| Play.new(datum)  }
+    data.map { |datum| Play.new(datum) }
   end
 
   def initialize(options)
@@ -26,26 +27,65 @@ class Play
   end
 
   def create
-    raise "#{self} is already in the database" if @id
+    raise "#{self} already exists in the database" if @id
     PlayDBConnection.instance.execute(<<-SQL, @title, @year, @playwright_id)
-      INSERT INTO
-        plays (title, year, playwright_id)
-      VALUES
-        (?, ?, ?)
+    INSERT INTO
+      plays(title, year, playwright_id)
+    VALUES
+      (?, ?, ?)
     SQL
     @id = PlayDBConnection.instance.last_insert_row_id
   end
 
   def update
-    raise "#{self} is not in the database yet" unless @id
+    raise "#{self} isn't in the database yet, create first" unless @id
     PlayDBConnection.instance.execute(<<-SQL, @title, @year, @playwright_id, @id)
-      UPDATE
-        plays
-      SET
-        title = ?, year = ?, playwright_id = ?
-      WHERE
-        id = ?
-      SQL
+    UPDATE
+      plays
+    SET
+      title = ?, year = ?, playwright_id = ?
+    WHERE
+      id = ?
+    SQL
   end
 
+
+end
+
+class Playwright
+  attr_accessor :name, :birth_year
+
+  def self.all
+    data = PlayDBConnection.instance.execute('select * from playwrights')
+    data.map { |datum| Playwright.new(datum)  }
+  end
+
+  def initialize(options)
+    @name = options['name']
+    @birth_year = options['birth_year']
+    @id = options['id']
+  end
+
+  def create
+    raise "#{self} is a Playwright that is in the database" if @id
+    PlayDBConnection.instance.execute(<<-SQL, @name, @birth_year)
+    INSERT INTO
+      playwrights(name, birth_year)
+    VALUES
+      (?, ?)
+    SQL
+    @id = PlayDBConnection.instance.last_insert_row_id
+  end
+
+  def update
+    raise "#{self} isn't in the database yet" unless @id
+    PlayDBConnection.instance.execute(<<-SQL, @name, @birth_year, @id)
+    UPDATE
+      playwrights
+    SET
+      name = ?, birth_year = ?
+    WHERE
+      id = ?
+    SQL
+  end
 end

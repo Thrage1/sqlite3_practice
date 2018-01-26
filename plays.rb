@@ -12,6 +12,7 @@ class PlayDBConnection < SQLite3::Database
 end
 
 class Play
+    attr_accessor :title, :year, :playwright_id
   def self.all
     data = PlayDBConnection.instance.execute("SELECT * FROM plays")
     data.map { |datum| Play.new(datum)  }
@@ -32,9 +33,19 @@ class Play
       VALUES
         (?, ?, ?)
     SQL
+    @id = PlayDBConnection.instance.last_insert_row_id
   end
 
   def update
+    raise "#{self} is not in the database yet" unless @id
+    PlayDBConnection.instance.execute(<<-SQL, @title, @year, @playwright_id, @id)
+      UPDATE
+        plays
+      SET
+        title = ?, year = ?, playwright_id = ?
+      WHERE
+        id = ?
+      SQL
   end
 
 end
